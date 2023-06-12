@@ -6,13 +6,11 @@ from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from .models import WatchList, StreamPlatform, Review
 from .serializers import WatchListSerializer, StreamPlatformSerializer, ReviewSerializer
-
+from .permissions import IsAdminOrReadOnly, IsReviewUserorReadOnly
 
 # Create your views here.
 class ReviewList(generics.ListAPIView):
     serializer_class = ReviewSerializer
-    
-    permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         pk = self.kwargs.get('pk')
@@ -21,7 +19,9 @@ class ReviewList(generics.ListAPIView):
 
 class ReviewCreate(generics.CreateAPIView):
     serializer_class = ReviewSerializer
-
+    
+    permission_classes = [IsAuthenticated]
+    
     def get_queryset(self):
         return Review.objects.all()
     
@@ -49,14 +49,18 @@ class ReviewCreate(generics.CreateAPIView):
 class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Review.objects.all()
     serializer_class = ReviewSerializer
-
+    
+    permission_classes = [IsReviewUserorReadOnly]
 
 class StreamPlatformView(viewsets.ModelViewSet):
     queryset = StreamPlatform.objects.all()
     serializer_class = StreamPlatformSerializer
-
+    
+    permission_classes = [IsAdminOrReadOnly]
+    
 
 class WatchListAV(APIView):
+    permission_classes = [IsAdminOrReadOnly]
     
     def get(self, request):
         movies = WatchList.objects.all()
@@ -73,6 +77,7 @@ class WatchListAV(APIView):
 
 
 class WatchListDetailAV(APIView):
+    permission_classes = [IsAdminOrReadOnly]
     
     def get(self, request, pk):
         try:
